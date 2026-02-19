@@ -1,4 +1,4 @@
-// ignore_for_file: sort_child_properties_last
+// ignore_for_file: sort_child_properties_last, prefer_is_empty
 
 import 'package:flutter/material.dart';
 
@@ -10,6 +10,14 @@ class BmiUi extends StatefulWidget {
 }
 
 class _BmiUiState extends State<BmiUi> {
+  // สร้างตัวคุม textfield
+  TextEditingController weightController = TextEditingController();
+  TextEditingController heightController = TextEditingController();
+
+  // สร้างตัวแปรสำหรับเก็บค่า BMI และะแปรผล
+  double bmivalue = 0;
+  String bmiresult = 'การแปรผล';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,6 +60,8 @@ class _BmiUiState extends State<BmiUi> {
                 ),
                 SizedBox(height: 6),
                 TextField(
+                  controller: weightController,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.symmetric(
                       vertical: 18,
@@ -87,6 +97,8 @@ class _BmiUiState extends State<BmiUi> {
                 ),
                 SizedBox(height: 6),
                 TextField(
+                  controller: heightController,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.symmetric(
                       vertical: 18,
@@ -105,7 +117,38 @@ class _BmiUiState extends State<BmiUi> {
                   height: 30,
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    if (weightController.text.length == 0 ||
+                        heightController.text.length == 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('กรุณากรอกข้อมูลให้ครบ'),
+                          backgroundColor: Colors.red,
+                          duration: Duration(seconds: 3),
+                        ),
+                      );
+                      return;
+                    }
+
+                    // คำนวณ BMI
+                    double weight = double.parse(weightController.text);
+                    double height = double.parse(heightController.text);
+                    double bmi = weight / ((height / 100) * (height / 100));
+                    setState(() {
+                      bmivalue = bmi;
+                    });
+
+                    // แปรผล BMI
+                    if (bmi < 18.5) {
+                      bmiresult = 'น้ําหนักน้อย';
+                    } else if (bmi >= 18.5 && bmi < 24.9) {
+                      bmiresult = 'น้ําหนักปกติ';
+                    } else if (bmi >= 25 && bmi < 29.9) {
+                      bmiresult = 'อ้วน';
+                    } else {
+                      bmiresult = 'อ้วนมาก';
+                    }
+                  },
                   child: Text(
                     'คำนวณค่า BMI',
                     style: TextStyle(
@@ -128,7 +171,14 @@ class _BmiUiState extends State<BmiUi> {
                   height: 15,
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      weightController.clear();
+                      heightController.clear();
+                      bmivalue = 0.0;
+                      bmiresult = 'การแปรผล';
+                    });
+                  },
                   child: Text(
                     'ล้างข้อมูล',
                     style: TextStyle(
@@ -161,7 +211,7 @@ class _BmiUiState extends State<BmiUi> {
                         child: Column(
                           children: [
                             SizedBox(
-                              height: 10,
+                              height: 5,
                             ),
                             Text(
                               'BMI',
@@ -171,11 +221,18 @@ class _BmiUiState extends State<BmiUi> {
                               ),
                             ),
                             Text(
-                              '0.00',
+                              bmivalue.toStringAsFixed(2),
                               style: TextStyle(
                                   fontSize: 30,
                                   fontWeight: FontWeight.bold,
                                   color: const Color.fromARGB(255, 216, 19, 5)),
+                            ),
+                            Text(
+                              bmiresult,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),

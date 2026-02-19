@@ -54,6 +54,13 @@ class _BmrUiState extends State<BmrUi> {
     );
   }
 
+  // ตัวตวบคุม Textfield
+  TextEditingController weightController = TextEditingController();
+  TextEditingController heightController = TextEditingController();
+  TextEditingController ageController = TextEditingController();
+
+  double bmrvalue = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,6 +160,8 @@ class _BmrUiState extends State<BmrUi> {
                     ),
                     SizedBox(height: 6),
                     TextField(
+                      controller: weightController,
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(
                           vertical: 18,
@@ -188,6 +197,8 @@ class _BmrUiState extends State<BmrUi> {
                     ),
                     SizedBox(height: 6),
                     TextField(
+                      controller: heightController,
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(
                           vertical: 18,
@@ -223,6 +234,8 @@ class _BmrUiState extends State<BmrUi> {
                     ),
                     SizedBox(height: 6),
                     TextField(
+                      controller: ageController,
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(
                           vertical: 18,
@@ -241,7 +254,43 @@ class _BmrUiState extends State<BmrUi> {
                       height: 30,
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // คำนวณ BMR และแสดงผลลัพธ์
+                        if (weightController.text.isEmpty ||
+                            heightController.text.isEmpty ||
+                            ageController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('กรุณากรอกข้อมูลให้ครบ'),
+                              backgroundColor: Colors.red,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+
+                          return;
+                        }
+
+                        // คำนวณ BMR
+                        double weight = double.parse(weightController.text);
+                        double height = double.parse(heightController.text);
+                        int age = int.parse(ageController.text);
+
+                        double bmr;
+                        if (selectedGender == "ชาย") {
+                          bmr =
+                              66 + (13.7 * weight) + (5 * height) - (6.8 * age);
+                        } else {
+                          bmr = 655 +
+                              (9.6 * weight) +
+                              (1.8 * height) -
+                              (4.7 * age);
+                        }
+
+                        // แสดงผลลัพธ์
+                        setState(() {
+                          bmrvalue = bmr;
+                        });
+                      },
                       child: Text(
                         'คำนวณค่า BMI',
                         style: TextStyle(
@@ -264,7 +313,15 @@ class _BmrUiState extends State<BmrUi> {
                       height: 15,
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        setState(() {
+                          weightController.clear();
+                          heightController.clear();
+                          ageController.clear();
+                          bmrvalue = 0;
+                          selectedGender = "ชาย";
+                        });
+                      },
                       child: Text(
                         'ล้างข้อมูล',
                         style: TextStyle(
@@ -286,7 +343,7 @@ class _BmrUiState extends State<BmrUi> {
                     ),
                     Center(
                       child: Container(
-                          height: 120,
+                          height: 130,
                           width: 340,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -300,19 +357,26 @@ class _BmrUiState extends State<BmrUi> {
                                   height: 10,
                                 ),
                                 Text(
-                                  'BMI',
+                                  'BMR',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
-                                  '0.00',
+                                  bmrvalue.toStringAsFixed(2),
                                   style: TextStyle(
                                       fontSize: 30,
                                       fontWeight: FontWeight.bold,
                                       color: const Color.fromARGB(
                                           255, 216, 19, 5)),
+                                ),
+                                Text(
+                                  'kcal/day',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ],
                             ),
